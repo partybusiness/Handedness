@@ -1,0 +1,461 @@
+setwd("D:\\myDocuments\\gamefeel\\handedness")
+# library(ggplot2)
+polls <- read.csv("polls.csv");
+
+legend <- read.csv("legend.csv");
+
+#class (legend)
+#legend$Controls == "L"
+
+sum(legend$Controls == "L")
+sum(legend$Controls == "R")
+sum(legend$Controls == "S")
+sum(legend$Controls == "X")
+
+
+sum(legend$PlayerCount == "2" & legend$Controls == "L")
+
+dates = polls[[1]]
+num1 = polls[[2]]
+num2 = polls[[3]]
+num3 = polls[[4]]
+num4 = polls[[5]]
+num5 = polls[[6]]
+num6 = polls[[7]]
+num7 = polls[[8]]
+num8 = polls[[9]]
+num9 = polls[[10]]
+num10 = polls[[11]]
+
+ranked = rbind(
+data.frame(Date = dates, Abbreviation = num1, Rank = 1),
+data.frame(Date = dates, Abbreviation = num2, Rank = 2),
+data.frame(Date = dates, Abbreviation = num3, Rank = 3),
+data.frame(Date = dates, Abbreviation = num4, Rank = 4),
+data.frame(Date = dates, Abbreviation = num5, Rank = 5),
+data.frame(Date = dates, Abbreviation = num6, Rank = 6),
+data.frame(Date = dates, Abbreviation = num7, Rank = 7),
+data.frame(Date = dates, Abbreviation = num8, Rank = 8),
+data.frame(Date = dates, Abbreviation = num9, Rank = 9),
+data.frame(Date = dates, Abbreviation = num10, Rank = 10)
+)
+
+ranked <- subset(ranked,Abbreviation!='' )
+
+
+handedness <- merge(x = ranked, y = legend, by = "Abbreviation", all = TRUE)
+
+
+companyCounts <- data.frame(Company = unique(legend$Company), L = 0, R = 0, S = 0, X = 0, P1= 0, P2=0)
+
+
+
+unique(legend$Company)
+
+sum(legend$Company == "Midway" & legend$Controls == "L")
+
+table(legend$Company[legend$Controls == "L"])
+table(legend$Company[legend$Controls == "R"])
+table(legend$Company[legend$Controls == "X"])
+table(legend$Company[legend$Controls == "S"])
+
+#companyCounts[companyCounts$Company == "Atari",]
+
+for (i in unique(legend$Company)){
+ companyCounts$L[companyCounts$Company == i] = sum(legend$Controls[legend$Company == i] == "L")
+ companyCounts$R[companyCounts$Company == i] = sum(legend$Controls[legend$Company == i] == "R")
+ companyCounts$X[companyCounts$Company == i] = sum(legend$Controls[legend$Company == i] == "X")
+ companyCounts$S[companyCounts$Company == i] = sum(legend$Controls[legend$Company == i] == "S")
+ companyCounts$P1[companyCounts$Company == i] = sum(legend$PlayerCount[legend$Company == i] == "1")
+ companyCounts$P2[companyCounts$Company == i] = sum(legend$PlayerCount[legend$Company == i] == "2")
+}
+
+gameRanks = as.data.frame(matrix(1:(length(legend$Game)*length(unique(ranked$Date))), ncol = length(unique(ranked$Date))))
+colnames(gameRanks) = unique(ranked$Date)
+rownames(gameRanks) = legend$Abbreviation
+
+ranked[20,]
+
+gameRanks[1:length(gameRanks[,1]),1:length(gameRanks)]=0
+
+# ranked[1:length(ranked$Date),]$Date
+
+
+for (i in 1:length(ranked$Date)){
+ gameRanks[ranked[i,]$Abbreviation,ranked[i,]$Date] = ranked[i,]$Rank
+}
+
+
+years = c(1979:1986)
+
+legend$year = 0
+
+legend$peak = 0
+
+legend$Abbreviation[10]
+
+
+for (i in 1:length(legend$Game)) {
+ tempyear = sort(ranked$Date[ranked$Abbreviation == legend$Abbreviation[i] & ranked$Rank > 0])[1]
+ legend$year[i] = format(as.Date(tempyear, format="%Y-%m-%d"),"%Y")
+ highestRank = sort(ranked$Rank[ranked$Abbreviation == legend$Abbreviation[i] & ranked$Rank > 0])[1]
+ legend$peak[i] = sort(ranked$Date[ranked$Abbreviation == legend$Abbreviation[i] & ranked$Rank == highestRank])[1]
+}
+
+
+yearcounts = data.frame(year = years, total = 0, L = 0, R = 0, S = 0, X = 0, P1= 0, P2=0, P3=0, RJ = 0, SI = 0, SW = 0, STEER = 0, HO = 0, GUN = 0, BALL = 0, SHOOTER = 0)
+
+
+for (i in years) {
+ yearcounts$total[yearcounts$year == i] = sum(legend$year == i)
+ yearcounts$R[yearcounts$year == i] = sum(legend$year == i & legend$Controls == "R") / sum(legend$year == i ) * 100
+ yearcounts$L[yearcounts$year == i] = sum(legend$year == i & legend$Controls == "L") / sum(legend$year == i ) * 100
+ yearcounts$S[yearcounts$year == i] = sum(legend$year == i & legend$Controls == "S") / sum(legend$year == i ) * 100
+ yearcounts$X[yearcounts$year == i] = sum(legend$year == i & legend$Controls == "X") / sum(legend$year == i ) * 100
+ yearcounts$P1[yearcounts$year == i] = sum(legend$year == i & legend$PlayerCount == "1") / sum(legend$year == i ) * 100
+ yearcounts$P2[yearcounts$year == i] = sum(legend$year == i & legend$PlayerCount == "2")  / sum(legend$year == i ) * 100
+ yearcounts$P3[yearcounts$year == i] = sum(legend$year == i & legend$PlayerCount > "2")  / sum(legend$year == i ) * 100
+ yearcounts$RJ[yearcounts$year == i] = sum(legend$year == i & legend$Controls == "R" & legend$Note != "Track Ball")  / sum(legend$year == i ) * 100
+ yearcounts$SI[yearcounts$year == i] = sum(legend$year == i & legend$Genre == "Space Invader" & legend$Controls == "L")  / sum(legend$year == i ) * 100
+ yearcounts$SW[yearcounts$year == i] = sum(legend$year == i & legend$Genre == "Space Wars")  / sum(legend$year == i ) * 100
+ yearcounts$HO[yearcounts$year == i] = sum(legend$year == i & legend$Genre == "Head-On")  / sum(legend$year == i ) * 100
+ yearcounts$STEER[yearcounts$year == i] = sum(legend$year == i & legend$Note == "Steering Wheel")  / sum(legend$year == i ) * 100
+ yearcounts$GUN[yearcounts$year == i] = sum(legend$year == i & legend$Note == "Light Gun")  / sum(legend$year == i ) * 100
+ yearcounts$BALL[yearcounts$year == i] = sum(legend$year == i & legend$Note == "Track Ball")  / sum(legend$year == i ) * 100
+ yearcounts$SHOOTER[yearcounts$year == i] = sum(legend$year == i & (legend$Genre == "Side-Scroll Shooter" | legend$Genre == "Scrolling shooter" | legend$Genre == "Multi-directional scrolling shooter")) / sum(legend$year == i) * 100
+}
+
+sum(legend$year == "1980" & legend$Genre == "Space Invader" & legend$Controls == "L")
+sum(legend$year == "1980" & legend$Genre == "Space Invader")
+
+
+list <- legend[legend$year == "1982",1:4]
+list[order(list$Controls),]
+
+lines(c(1979:1986), yearcounts$P2, col = "#6600CC", lwd = 1)
+text (1979, y = yearcounts$P2[yearcounts$year==1979], labels = "2 Player", pos = 3, offset = 0.5, cex = 1, col = "#6600CC")
+
+lines(c(1979:1986), yearcounts$HO, col = "#CC6666", lwd = 1)
+text (1986, y = yearcounts$HO[yearcounts$year==1986], labels = "Head-On", pos = 4, offset = 0.5, cex = 1, col = "#CC6666")
+
+lines(c(1979:1986), yearcounts$STEER, col = "#CC66FF", lwd = 1)
+lines(c(1979:1986), yearcounts$GUN, col = "#CC0066", lwd = 1)
+lines(c(1979:1986), yearcounts$RJ, col = "#CC6666", lwd = 1)
+
+
+color = "#777777"
+
+plot(1, type = "n", xlab = "Year", ylab = "Percent", xlim = c(1979, 1987), ylim = c(0,30))
+lines(c(1982.5,1982.5), c(0,30), col = "#888888", lwd = 0.5, lty = 2)
+
+lines(c(1979:1986), yearcounts$total, col = "#CC6666", lwd = 1)
+
+lines(c(1982.5,1982.5), c(0,100), col = "#888888", lwd = 0.5, lty = 2)
+
+plot(1, type = "n", xlab = "Year", ylab = "Percent", xlim = c(1979, 1987), ylim = c(0,100), col.lab=color, col = color, col.axis = color, col.tick = color)
+lines(c(1979:1986), yearcounts$RJ, col = "#CC6666", lwd = 1)
+text (1986, y = yearcounts$RJ[yearcounts$year==1986], labels = "Right", pos = 4, offset = 0.5, cex = 1, col = "#CC6666")
+lines(c(1979:1986), yearcounts$L, col = "#6666FF", lwd = 1)
+text (1986, y = yearcounts$L[yearcounts$year==1986], labels = "Left", pos = 4, offset = 0.5, cex = 1, col = "#6666FF")
+lines(c(1979:1986), yearcounts$S, col = "#66CC66", lwd = 1)
+text (1986, y = yearcounts$S[yearcounts$year==1986], labels = "Symmetrical", pos = 4, offset = 0.5, cex = 1, col = "#66CC66")
+lines(c(1979:1986), yearcounts$X, col = "#66CCCC", lwd = 1)
+text (1986, y = yearcounts$X[yearcounts$year==1986], labels = "NA", pos = 4, offset = 0.5, cex = 1, col = "#66CCCC")
+
+
+plot(1, type = "n", xlab = "Year", ylab = "count", xlim = c(1979, 1987), ylim = c(0,80))
+lines(c(1979:1986), yearcounts$SI, col = "#66CC33", lwd = 1)
+text (1980, y = yearcounts$SI[yearcounts$year==1980], labels = "Space Invaders", pos = 3, offset = 0.5, cex = 1, col = "#66CC33")
+lines(c(1979:1986), yearcounts$SW, col = "#FF33FF", lwd = 1)
+text (1980, y = yearcounts$SW[yearcounts$year==1980], labels = "Space Wars", pos = 3, offset = 0.5, cex = 1, col = "#FF33FF")
+lines(c(1979:1986), yearcounts$RJ, col = "#CC6666", lwd = 1)
+text (1980, y = yearcounts$RJ[yearcounts$year==1980], labels = "Right", pos = 1, offset = 0.5, cex = 1, col = "#CC6666")
+lines(c(1979:1986), yearcounts$L, col = "#6666FF", lwd = 1)
+text (1980, y = yearcounts$L[yearcounts$year==1980], labels = "Left", pos = 3, offset = 0.5, cex = 1, col = "#6666FF")
+
+
+lines(c(1979:1986), yearcounts$SHOOTER, col = "#6666FF", lwd = 1)
+
+lines(c(1979:1986), yearcounts$L, col = "#6666FF", lwd = 1)
+text (1980, y = yearcounts$L[yearcounts$year==1980], labels = "Left", pos = 3, offset = 0.5, cex = 1, col = "#6666FF")
+
+plot(1, type = "n", xlab = "Year", ylab = "count", xlim = c(1979, 1987), ylim = c(0,80))
+
+
+
+
+barplot (yearcounts$year ~ cbind(yearcounts$SI, yearcounts$SW))
+
+counts <- table(yearcounts$SI, yearcounts$SW)
+barplot(counts, main="Space Invaders and Space Wars influenced games",
+  xlab="Number of Gears", col=c("darkblue","red"),
+  legend = rownames(counts), beside=TRUE)
+
+
+companyCounts[companyCounts$Company=="Midway"|companyCounts$Company=="Bally Midway"|companyCounts$Company=="Bally",]
+
+companyCounts[companyCounts$Company=="Gottlieb"|companyCounts$Company=="Mylstar",]
+
+
+
+legend[legend$Controls == "R",1:6]
+
+temp = legend[legend$Company == "Atari",1:6]
+
+temp[order(temp$Controls), ]
+
+legend[legend$Control == "R",1:6]
+
+dates <- as.Date(colnames(gameRanks), "%Y-%m-%d")
+dates-as.Date("1979-06-15", "%Y-%m-%d")
+
+# Gottlieb -> Mylstar -> Premier mostly goes back to pinball
+# Atari mostly made symmetrical joysticks, Gauntlet being the only one with a right joystick. Several right trackballs.
+# Exidy made Crash as a Head On knock-off and Targ, but after Crossbow is a success, they mostly focus on 
+# Gremlin makes Head On and is bought (?) by Sega
+# Starhawk is really awkward controls that probably should have been a track ball
+
+numDays <- function(d){
+    as.Date(d, "%Y-%m-%d") - as.Date("1979-06-15", "%Y-%m-%d")
+}
+
+yearpositions = c(numDays("1979-1-1"),numDays("1980-1-1"),numDays("1981-1-1"),numDays("1982-1-1"),numDays("1983-1-1"),numDays("1984-1-1"),numDays("1985-1-1"),numDays("1986-1-1"),numDays("1987-1-1"))
+yearlabels = c(1979,1980,1981,1982,1983,1984,1985,1986,1987)
+
+plot(1, type = "n", xlab = "Date", ylab = "Rank", xlim = c(numDays("1979-01-01"), numDays("1987-01-02")), ylim = c(1,10), xaxt='n', yaxt='n')
+axis(1, outer = TRUE, at=yearpositions, line=-5, las=0, label=yearlabels)
+axis(2, outer = TRUE, at=seq(1, 10, by = 1), line=-4, las=0, label=seq(10, 1, by = -1))
+
+
+cleargraph <- function () {
+  color = "#444444"
+  plot(1, type = "n", pch=1, xlab = "Date", ylab = "Rank", xlim = c(numDays("1979-01-01"), numDays("1987-01-02")), ylim = c(1,10), xaxt='n', yaxt='n', axes= "F", col.lab = color)
+  axis(1, outer = TRUE, at=yearpositions, line=-5, las=0, label=yearlabels, col.axis = color, col = color)
+  axis(2, outer = TRUE, at=seq(1, 10, by = 1), line=-4, las=1, label=seq(10, 1, by = -1), col.axis = color, col = color)
+  eightytwo = numDays("1982-06-15")
+  lines (c(eightytwo,eightytwo), y = c(2.2,10), col = "#AAAAAA", lwd = 0.5, lty = 2)
+  text (eightytwo, y = 2, labels = "1982-ish", pos = 2, offset = 0, cex = 1, col = "#AAAAAA", srt=90)
+}
+
+# ytp-ce-element ytp-ce-video ytp-ce-element-show ytp-ce-large-round ytp-ce-top-right-quad ytp-ce-size-640
+# .ytp-ce-video  display:none
+
+drawranks <- function(game, linecol){
+  indices <- gameRanks[game,]>0
+  lineranks <- 11-gameRanks[game,][indices]
+  linedates <- numDays(colnames(gameRanks)[indices])
+  lines(linedates, lineranks, col = linecol, lwd = 0.5, lty = 2)
+  # points(linedates, y=lineranks, type="p", pch=20, col=linecol, cex=1)
+  gameName = legend$Game[legend$Abbreviation == game][1]
+  # text (linedates[1], y = lineranks[1], labels = gameName, pos = 2, offset = 0.5, cex = 1, col = linecol)
+}
+
+drawrankList <- function(gameList, linecol){
+	for (i in 1:length(gameList)){
+	 drawranks(gameList[i],linecol)
+	}
+}
+
+drawrankListMulti <- function(gameList, linecol){
+	for (i in 1:length(gameList)){
+	 drawranks(gameList[i],linecol[i])
+	}
+}
+
+numDays(legend$peak[legend$Abbreviation == "DK"])
+
+plotpeak <- function (abbr, dotcol, textpos) {
+ peakDate = legend$peak[legend$Abbreviation == abbr]
+ xx = numDays(peakDate)
+ yy = 11 - gameRanks[abbr,peakDate]
+ points (xx, yy, pch = 19, col = dotcol)
+ text (xx, y = yy, labels = legend$Game[legend$Abbreviation == abbr], pos = textpos, offset = 0.5, cex = 1, col = dotcol)
+}
+
+plotpeakMulti <- function(gameList, linecol){
+	for (i in 1:length(gameList)){
+	 plotpeak(gameList[i],linecol, 2)
+	}
+}
+
+# right controllers
+cleargraph ()
+plotpeak ("FOOT", "#FF8866", 2)
+plotpeak ("MC", "#FF8866", 1)
+plotpeak ("MILL", "#FF8866", 2)
+plotpeak ("CENT", "#FF8866", 2)
+
+plotpeak ("HO", "#CC00CC", 2)
+plotpeak ("CRASH", "#CC00CC", 2)
+plotpeak ("RALX", "#CC00CC", 2)
+plotpeak ("TARG", "#CC00CC", 2)
+plotpeak ("GAUNT", "#CC00CC", 2)
+plotpeak ("WoW", "#CC00CC", 1)
+
+plotpeak ("SH", "#66CCCC", 2)
+plotpeak ("TRON", "#66CCCC", 2)
+plotpeak ("TEMP", "#666666", 1)
+
+drawranks ("HO", "#CC00CC")
+drawranks ("GAUNT", "#CC00CC")
+
+plotpeak ("PAC", "#CCCC00", 2)
+
+# space wars
+cleargraph ()
+plotpeak ("SW", "#666666", 1)
+plotpeak ("AST", "#666666", 1)
+plotpeak ("LL", "#666666", 1)
+plotpeak ("RO", "#666666", 1)
+plotpeak ("SC", "#666666", 3)
+plotpeak ("OR", "#666666", 1)
+plotpeak ("AA", "#666666", 1)
+plotpeak ("SD", "#666666", 3)
+plotpeak ("STRTRK", "#666666", 1)
+plotpeak ("AST Deluxe", "#666666", 1)
+
+drawranks ("AST", "#666666")
+
+#space invaders
+cleargraph ()
+plotpeak ("SI", "#11AA11", 1)
+plotpeak ("GLX", "#11AA11", 1)
+plotpeak ("AF", "#11AA11", 1)
+plotpeak ("GLG", "#11AA11", 4)
+plotpeak ("COSG", "#11AA11", 2)
+plotpeak ("MONC", "#11AA11", 2)
+plotpeak ("PHX", "#11AA11", 3)
+plotpeak ("PLD", "#11AA11", 4)
+plotpeak ("AB", "#11AA11", 4)
+plotpeak ("SE", "#11AA11", 2)
+plotpeak ("CARN", "#11AA11", 1)
+plotpeak ("COSA", "#11AA11", 3)
+plotpeak ("GYRS", "#11AA11", 4)
+plotpeak ("GAPLU", "#11AA11", 1)
+
+plotpeak ("CENT", "#7777CC", 1)
+plotpeak ("MILL", "#7777CC", 1)
+#drawranks ("SI", "#11AA11")
+
+
+plotpeak ("SCRAM", "#CC77CC", 2)
+plotpeak ("ZAX", "#CC77CC", 1)
+plotpeak ("SCOB", "#CC77CC", 4)
+plotpeak ("VAN", "#CC77CC", 2)
+plotpeak ("TIMPI", "#CC77CC", 1)
+plotpeak ("XEV", "#CC77CC", 2)
+plotpeak ("1942", "#CC77CC", 1)
+
+
+shooters = legend[legend$Genre == "Side-Scroll Shooter" | legend$Genre == "Scrolling shooter" | legend$Genre == "Multi-directional scrolling shooter",c(1:6)]
+
+
+
+famicomrelease = numDays ("1983-07-15")
+cleargraph ()
+text (famicomrelease, y = 5, "Famicom release date", pos = 2, offset = 0.8, cex = 1, col = "#999999", srt=90)
+lines(c(famicomrelease, famicomrelease), c(1,10), col = "#999999", lwd = 0.5, lty = 2)
+plotpeak ("DK", "#CC3333", 2)
+plotpeak ("DKJ", "#CC3333", 1)
+plotpeak ("POP", "#CC3333", 1)
+plotpeak ("MARBRO", "#CC3333", 1)
+plotpeak ("PUNCH", "#CC3333", 1)
+plotpeak ("VSGOLF", "#CC3333", 2)
+plotpeak ("SUPUNCH", "#CC3333", 4)
+plotpeak ("VSXCITE", "#CC3333", 1)
+
+plotpeak ("DUCK", "#999999", 1)
+plotpeak ("HOGAN", "#999999", 1)
+
+
+
+
+plotpeakMulti(legend$Abbreviation[legend$Controls == "X"], "#885555")
+
+plotpeakMulti(legend$Abbreviation[legend$Company == "Nintendo"], "#885555")
+plotpeakMulti(legend$Abbreviation[legend$Controls == "L"], "#885555")
+
+
+
+
+
+
+
+
+
+plotpeak ("DK", "#66CCCC")
+
+ drawranks("DK",linecol)
+ 
+ 
+
+#make all left-stick blue
+drawrankList ( legend$Abbreviation[legend$Controls == "L"], "#FF9999")
+#make all right-sticks red
+drawrankList ( legend$Abbreviation[legend$Controls == "R" & legend$Notes == "Track Ball"], "#000000")
+
+drawrankList ( legend$Abbreviation[legend$Controls == "R" & legend$Note != "Track Ball" & legend$Company != "Exidy"], "#777777")
+
+
+cleargraph ()
+drawrankList ( legend$Abbreviation[legend$Controls != "R" & legend$Company == "Exidy"], "#777777")
+drawrankList ( legend$Abbreviation[legend$Controls == "R" & legend$Company == "Exidy"], "#FF5555")
+
+drawrankList ( legend$Abbreviation[legend$Note == "Rotation"], "#777777")
+
+drawrankList ( legend$Abbreviation[legend$Controls == "S"], "#99EEAA")
+
+drawrankList ( legend$Abbreviation[legend$Controls == "X"], "#BBBBBB")
+
+# Plotting a line
+lines(lineranks, linedates, col = "red", 
+      lwd = 2, lty = 1)
+
+
+axis(2, at=x, labels=x, pos= seq(1, 10, by = 1))
+axis(1, at=0, pos= seq(1, 10, by = 1))
+
+
+
+axis(side = 1, at = seq(0, 10, by = 0.1), labels = FALSE, tcl = -0.2)
+, lty=, col=, las=, tck=, ...)
+
+
+
+plot(1:28, xaxt = "n")
+axis(side=1, outer = TRUE, at=seq(1,n,2), labels=labs[seq(1,n,2)], cex.axis=0.6)
+axis(side=1, at=seq(2,n,2), labels=labs[seq(2,n,2)], cex.axis=0.6)
+
+unique(ranked$Date)[1:10]
+
+plot(x, y1, type = "b", frame = FALSE, pch = 19, 
+     col = "red", xlab = "x", ylab = "y")
+# Add a second line
+lines(x, y2, pch = 18, col = "blue", type = "b", lty = 2)
+# Add a legend to the plot
+legend("topleft", legend=c("Line 1", "Line 2"),
+       col=c("red", "blue"), lty = 1:2, cex=0.8)
+	   
+axis(side, at = NULL, labels = TRUE, tick = TRUE, line = NA,
+     pos = NA, outer = FALSE, font = NA, lty = "solid",
+     lwd = 1, lwd.ticks = lwd, col = NULL, col.ticks = NULL,
+     hadj = NA, padj = NA, …)
+
+gplot(dat, g = 1, gmode = "digraph", diag = FALSE, 
+    label = NULL, coord = NULL, jitter = TRUE, thresh = 0, 
+    thresh.absval=TRUE, usearrows = TRUE, mode = "fruchtermanreingold", 
+    displayisolates = TRUE, interactive = FALSE, interact.bycomp = FALSE,
+    xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL, pad = 0.2, 
+    label.pad = 0.5, displaylabels = !is.null(label), boxed.labels = FALSE, 
+    label.pos = 0, label.bg = "white", vertex.enclose = FALSE, 
+    vertex.sides = NULL, vertex.rot = 0, arrowhead.cex = 1, label.cex = 1, 
+    loop.cex = 1, vertex.cex = 1, edge.col = 1, label.col = 1, 
+    vertex.col = NULL, label.border = 1, vertex.border = 1, edge.lty = NULL,
+    edge.lty.neg=2, label.lty = NULL, vertex.lty = 1, edge.lwd = 0, 
+    label.lwd = par("lwd"), edge.len = 0.5, edge.curve = 0.1, 
+    edge.steps = 50, loop.steps = 20, object.scale = 0.01, uselen = FALSE, 
+    usecurve = FALSE, suppress.axes = TRUE, vertices.last = TRUE, 
+    new = TRUE, layout.par = NULL, ...)
+	
+	
+ ///  https://datatofish.com/create-dataframe-in-r/
