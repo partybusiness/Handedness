@@ -1,0 +1,25 @@
+LJ,"Left Joystick, buttons on right"
+RT,"Right Trackball, buttons on left"
+LS,"Left Spacewar - rotation on left, thrust on right"
+RJ,"Right Joystick, buttons on left"
+MJ,"Mirrored Joystick, duplicate buttons on both left and right"
+CJT,Centred Joystick with Trigger
+UT,Upper Trackball with button below
+TSLM,Twin Stick with Left Movement
+CJ,Centred Joystick with no other buttons
+STEER,Steering wheel
+GUN,Gun
+TANK,"Two levers that control movement like a tank, with triggers or thumb buttons to fire"
+YOKE,"Steering plus up-down movement, with triggers or thumb buttons to fire"
+LJRP,"Left Joystick, Right Paddle"
+RJLP,"Right Joystick, Left Paddle"
+LM,"Left Movement, two buttons on left to move, other buttons on right"
+DEF,"Defender: up-down joystick plus reverse direction button on left, thrust and fire on the right"
+RP,"Right Paddle, buttons on left"
+MT,"Mirrored Trackball, duplicate buttons on both left and right"
+CT,Centred Trackball with no buttons
+MP,"Mirrored Paddle, knob in middle, buttons on left and right"
+SCOPE,"Scope shoot, used in Sea Wolf"
+BUTTONS,"All buttons, used in Track and Field and Hyper Sports"
+BAT,"Tiny bat on left, buttons on right, used in World Series"
+SUBROC,"Rotation on left, up down on right, used on SubRoc 3D"
